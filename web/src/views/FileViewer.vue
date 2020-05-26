@@ -70,7 +70,7 @@
 									:lazy-src="item.thumbnailLink"
 									:src="item.thumbnailLink"
 								></v-img>-->
-								<i :class="'icon ' + item.icon"></i>
+								<i :class="['icon ', item.icon]"></i>
 							</v-list-item-avatar>
 							<span class="v-list-item__title file-name">{{item.fileName}}</span>
 							<!-- <span v-if="!item.isFolder">
@@ -153,14 +153,15 @@ const ICON_NAME = {
 	'video/x-ms-wmv': 'icon-video',
 	'video/webm': 'icon-video',
 	'video/x-matroska': 'icon-video',
+	'video/flv': 'icon-video',
 	'application/zip': 'icon-zip',
 	'application/x-7z-compressed': 'icon-zip',
 	'application/x-rar-compressed': 'icon-zip',
 	'application/x-gzip': 'icon-zip',
-	'image/png': 'mdi-file-image',
-	'image/jpeg': 'mdi-file-image',
-	'image/gif': 'mdi-file-image',
-	'image/bmp': 'mdi-file-image',
+	'image/png': 'icon-img',
+	'image/jpeg': 'icon-img',
+	'image/gif': 'icon-img',
+	'image/bmp': 'icon-img',
 	'application/msword': 'mdi-file-word',
 	'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
 		'mdi-file-word',
@@ -172,10 +173,13 @@ const ICON_NAME = {
 	'application/vnd.ms-powerpoint': 'mdi-file-powerpoint',
 	'application/pdf': 'icon-pdf',
 	'text/x-sql': 'mdi-database',
-	'application/vnd.google-apps.document': 'mdi-file-document-box',
-	'application/vnd.google-apps.spreadsheet': 'mdi-google-spreadsheet',
-	'application/vnd.google-apps.presentation': 'mdi-file-presentation-box',
-	'text/plain': 'mdi-file-document'
+	'application/octet-stream': 'icon-octet-stream',
+	'application/x-font-ttf': 'icon-ttf',
+	'audio/x-flac': 'icon-music',
+	'audio/mpeg': 'icon-music',
+	'audio/flac': 'icon-music',
+	'audio/x-wav': 'icon-music',
+	'audio/x-hx-aac-adts': 'icon-music'
 }
 const ICON_COLOR = {
 	'application/vnd.google-apps.folder': '#FED032'
@@ -453,7 +457,7 @@ export default {
 					mimeType: f.mimeType,
 					fileSize: f.size ? prettyBytes(parseInt(f.size)) : '',
 					resourcePath,
-					icon: ICON_NAME[f.mimeType] || 'mdi-file',
+					icon: ICON_NAME[f.mimeType] || 'icon-unknown',
 					color: ICON_COLOR[f.mimeType],
 					thumbnailLink: f.thumbnailLink
 				}

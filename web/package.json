@@ -20,7 +20,8 @@
 		"vue-router": "^3.0.3",
 		"vuetify": "^2.0.0",
 		"xfetch-js": "^0.3.4",
-		"xgplayer": "^2.7.1"
+		"xgplayer": "^2.7.1",
+		"xgplayer-mp4": "^1.1.8"
 	},
 	"devDependencies": {
 		"@mdi/font": "^4.4.95",
