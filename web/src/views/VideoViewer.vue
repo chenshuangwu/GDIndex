@@ -74,32 +74,26 @@ export default {
 		// video.play()
 		// const url = new URL(atob(this.$route.query.urlBase64))
 		const url = this.$route.query.urlBase64
-
-
-		const urlObj = new URL(url)
-		const toks = urlObj.pathname.split('.')
-		const pathSansExt = toks.slice(0, -1).join('.')
-		const srtUrl = pathSansExt + '.srt'
-
-		this.player = new Player({
+		
+		  this.player = new Player({
 			id: 'video',
 			url: url,
 			fluid: true,
 			videoInit: true,
 			playbackRate: [0.5, 0.75, 1, 1.5, 2],
-			rotate: {
-				//视频旋转按钮配置项
-				innerRotate: true, //只旋转内部video
-				clockwise: false // 旋转方向是否为顺时针
+			rotate: {   //视频旋转按钮配置项
+			innerRotate: true, //只旋转内部video
+			clockwise: false // 旋转方向是否为顺时针
 			},
 			download: true, //设置download控件显示
 			pip: true, //画中画
 			cssFullscreen: true, //网页样式全屏
 			keyShortcut: 'on', // 键盘快捷键
-			preloadTime: 15
-		})
+		});
 	},
-	methods: {},
+	methods: {
+
+	},
 	beforeDestroy() {
 		this.player.destroy(true)
 	}

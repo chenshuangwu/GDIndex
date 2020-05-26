@@ -5,32 +5,48 @@
 				<router-link :to="{ path: '/', query: { rootId: $route.query.rootId } }" tag="span">{{ title }}</router-link>
 			</v-toolbar-title>
 			<portal to="menu">
-				<div class="white pa-4 header">
-					<v-menu offset-y v-if="drives.length">
-						<template v-slot:activator="{ on }">
-							<v-btn min-width="200" text outlined v-on="on" class="text-none justify-space-between">
-								<!-- <v-icon dense>mdi-google-drive</v-icon> -->
-								&nbsp;{{
-								currentDrive.text
-								}}
-								<v-icon>mdi-menu-down</v-icon>
-							</v-btn>
-						</template>
-						<v-list>
-							<v-list-item
-								v-for="(item, index) in drives"
-								:key="index.id"
-								@click="changeDrive(item.value)"
-							>
-								<v-list-item-title>{{item.text}}</v-list-item-title>
-							</v-list-item>
-						</v-list>
-					</v-menu>
-					<div class="search-box col-sm-3 col-md-3 col-lg-3 col col-xs-1 pa-0 ml-1">
-						<input class="search-input" type="text" v-model="keyword" @keyup.enter="searchFiles" placeholder="搜索文件">
-						<v-icon :focusable="false" @click="searchFiles" :ripple="false" class="icon">mdi-magnify</v-icon>
+				<div class="white d-flex flex-column">
+					<div class="pa-4 pb-0 header">
+						<v-menu offset-y v-if="drives.length">
+							<template v-slot:activator="{ on }">
+								<v-btn
+									min-width="200"
+									text
+									outlined
+									v-on="on"
+									class="text-none justify-space-between align-items-end"
+								>
+									<!-- <v-icon dense>mdi-google-drive</v-icon> -->
+									&nbsp;{{
+									currentDrive.text
+									}}
+									<v-icon>mdi-menu-down</v-icon>
+								</v-btn>
+							</template>
+							<v-list>
+								<v-list-item
+									v-for="(item, index) in drives"
+									:key="index.id"
+									@click="changeDrive(item.value)"
+								>
+									<v-list-item-title>{{item.text}}</v-list-item-title>
+								</v-list-item>
+							</v-list>
+						</v-menu>
+						<div v-else></div>
+
+						<div class="search-box col-sm-3 col-md-3 col-lg-3 col col-xs-1 pa-0 ml-1">
+							<input
+								class="search-input"
+								type="text"
+								v-model="keyword"
+								@keyup.enter="searchFiles"
+								placeholder="搜索文件"
+							/>
+							<v-icon :focusable="false" @click="searchFiles" :ripple="false" class="icon">mdi-magnify</v-icon>
+						</div>
 					</div>
-					
+					<v-switch v-model="current" dense  color="#00AEFF" class="ma-0 mr-2 align-self-end" label="当前页搜索"></v-switch>
 				</div>
 			</portal>
 			<!-- <portal-target name="navbar" slim /> -->
@@ -40,8 +56,13 @@
 			</v-toolbar-items>
 		</v-app-bar>
 
-		<v-content >
-			<router-view @saveCache="saveCache" :filesCache="filesCache" />
+		<v-content>
+			<router-view
+				@saveCache="saveCache"
+				:filesCache="filesCache"
+				:searchKey="keyword"
+				:current="current"
+			/>
 		</v-content>
 		<LoginDialog :cond="showAuthInput" />
 	</v-app>
@@ -60,7 +81,8 @@ export default {
 			value: {},
 			showAuthInput: false,
 			keyword: this.$route.query.keyword,
-			filesCache: {}
+			filesCache: {},
+			current: false
 		}
 	},
 	computed: {
@@ -105,11 +127,13 @@ export default {
 			this.$router.push({ path: '/', query: { rootId } })
 		},
 		searchFiles() {
-			if(this.keyword) {
+			if (this.keyword) {
 				const rootId = this.$route.query.rootId
-				this.$router.push({ path: '/', query: { rootId, keyword: this.keyword } })
+				this.$router.push({
+					path: '/',
+					query: { rootId, keyword: this.keyword }
+				})
 			}
-
 		},
 		saveCache(cache) {
 			this.filesCache = cache
@@ -138,14 +162,13 @@ ul {
 	.search-input {
 		padding: 6px 15px;
 		padding-right: 30px;
-		background-color: #F1F2F4;
+		background-color: #f1f2f4;
 		outline: none;
 		border-radius: 16px;
 		width: 100%;
 		::placeholder {
-			color: #9A9A9A;
+			color: #9a9a9a;
 		}
-
 	}
 	.icon {
 		position: absolute;

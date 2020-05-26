@@ -48,13 +48,19 @@
 							<v-icon>mdi-chevron-right</v-icon>
 						</template>
 					</v-breadcrumbs>
+<!-- 
+					<div class="search-box col-sm-3 col-md-3 col-lg-3 col col-xs-1 pa-0 ml-1">
+						<input class="search-input" type="text" v-model="searchKey"  placeholder="搜索当前文件">
+						<v-icon :focusable="false" :ripple="false" class="icon">mdi-magnify</v-icon>
+					</div> -->
+
 
 					<v-list-item class="pl-0 list-item list-header">
 						<span v-for="item in headers" :key="item.value" :class="item.class">{{item.text}}</span>
 					</v-list-item>
 
 					<v-list-item
-						v-for="item in list"
+						v-for="item in filterList"
 						:key="item.id"
 						tag="a"
 						class="pl-0 list-item"
@@ -95,7 +101,7 @@
 						<span v-show="loading">
 							<v-progress-circular indeterminate color="#34ABFF"></v-progress-circular>
 						</span>
-						<span v-if="loadEnd">共 {{list.length}} 项</span>
+						<span v-if="loadEnd">共 {{filterList.length}} 项</span>
 					</div>
 				</v-card>
 			</v-col>
@@ -186,7 +192,9 @@ const ICON_COLOR = {
 }
 export default {
 	props: {
-		filesCache: Object
+		filesCache: Object,
+		searchKey: String,
+		current: Boolean
 	},
 	data() {
 		return {
@@ -222,7 +230,9 @@ export default {
 			keyword: this.$route.query.keyword,
 			rootId: this.$route.query.rootId || window.props.default_root_id,
 			pathDialog: false,
-			searchItemSelected: ''
+			searchItemSelected: '',
+			// searchKey: '', // 当前结果搜索关键词
+			
 		}
 	},
 	computed: {
@@ -260,6 +270,25 @@ export default {
 				this.$route.query.rootId || window.props.default_root_id
 			)
 			return u.href
+		},
+		filterList() {
+			let key = this.searchKey
+			if(key && this.current) {
+				//不区分大小写处理
+				let reg = new RegExp(key, 'ig')
+
+                //es6 filter过滤匹配，有则返回当前，无则返回所有
+				return this.list.filter( (e) => {
+					return e.fileName.match(reg)
+				})
+
+				// 匹配所有字段
+				// return Object.keys(e).some(function(key) {
+				//     return e[key].match(reg);
+				// })
+			}
+            return this.list;
+
 		}
 	},
 	methods: {
