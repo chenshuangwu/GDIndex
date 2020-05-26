@@ -1,6 +1,6 @@
 # GDIndex
 
-![preview](https://i.imgur.com/ENkZwCU.png)
+![preview](https://i.imgur.com/AF89jZI.png)
 
 [繁體中文](README.zhtw.md)
 [简体中文](README.zh.md)
@@ -22,6 +22,15 @@
 -   Support Http Basic Auth
 -   Support multiple drives(personal, team) without changing server's code
 
+## Changelog
+
+### 2020/05/26
+-  Interface style update
+-  Support to configure the number of displayable cloud disks
+-  The files list page supports paging, and the paging size can be configured
+-  Add search function, incremental display of search results, and support jump to the corresponding path to browse
+-  Local cache files list, refresh the page if you want to update
+-  Play video using [xgplayer](https://github.com/bytedance/xgplayer)
 ## Usage
 
 ### Simple and automatic way

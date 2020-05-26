@@ -6,16 +6,40 @@ const gd = new GoogleDrive(self.props)
 const HTML = `<!DOCTYPE html><html lang=en><head><meta charset=utf-8><meta http-equiv=X-UA-Compatible content="IE=edge"><meta name=viewport content="width=device-width,initial-scale=1"><title>${self.props.title}</title><link href="/~_~_gdindex/resources/css/app.css" rel=stylesheet></head><body><script>window.props = { title: '${self.props.title}', default_root_id: '${self.props.default_root_id}', api: location.protocol + '//' + location.host, upload: ${self.props.upload} }<\/script><div id=app></div><script src="/~_~_gdindex/resources/js/app.js"><\/script></body></html>`
 
 async function onGet(request) {
-	let { pathname: path } = request
+	let {
+		pathname: path
+	} = request
 	const rootId =
 		request.searchParams.get('rootId') || self.props.default_root_id
 	if (path.startsWith('/~_~_gdindex/resources/')) {
 		const remain = path.replace('/~_~_gdindex/resources/', '')
 		const r = await fetch(
-			`https://raw.githubusercontent.com/maple3142/GDIndex/master/web/dist/${remain}`
+			`https://raw.githubusercontent.com/chenshuangwu/GDIndex/master/web/dist/${remain}`
 		)
 		return new Response(r.body, {
 			headers: {
+				'Content-Type': mime.getType(remain) + '; charset=utf-8',
+				'Cache-Control': 'max-age=600'
+			}
+		})
+	} else if (path.startsWith('/thumbnailLink/')) {
+		const remain = path.replace('/thumbnailLink/', '')
+		const r = await fetch(
+			`https://lh3.googleusercontent.com/${remain}`
+		)
+		return new Response(r.body, {
+			Headers: {
+				'Content-Type': mime.getType(remain) + '; charset=utf-8',
+				'Cache-Control': 'max-age=600'
+			}
+		})
+	} else if (path.startsWith('/iconLink/')) {
+		const remain = path.replace('/iconLink/', '')
+		const r = await fetch(
+			`https://drive-thirdparty.googleusercontent.com/${remain}`
+		)
+		return new Response(r.body, {
+			Headers: {
 				'Content-Type': mime.getType(remain) + '; charset=utf-8',
 				'Cache-Control': 'max-age=600'
 			}
@@ -60,13 +84,24 @@ async function onGet(request) {
 	}
 }
 async function onPost(request) {
-	let { pathname: path } = request
+	let {
+		pathname: path
+	} = request
 	const rootId =
 		request.searchParams.get('rootId') || self.props.default_root_id
-	if (path.substr(-1) === '/') {
+	const id = request.searchParams.get('id')
+	const pageToken = request.searchParams.get('pageToken') || null
+	let keyword = request.searchParams.get('keyword') || null
+	if (path === '/id2path') {
 		return new Response(
-			JSON.stringify(await gd.listFolderByPath(path, rootId)),
-			{
+			JSON.stringify(await gd.findPathById(id, rootId)), {
+				headers: {
+					'Content-Type': 'application/json'
+				}
+			})
+	} else if (path.substr(-1) === '/') {
+		return new Response(
+			JSON.stringify(await gd.listFolderByPath(path, rootId, pageToken, keyword)), {
 				headers: {
 					'Content-Type': 'application/json'
 				}
@@ -100,7 +135,9 @@ async function onPost(request) {
 	}
 }
 async function onPut(request) {
-	let { pathname: path } = request
+	let {
+		pathname: path
+	} = request
 	if (path.substr(-1) === '/') {
 		return new Response(null, {
 			headers: {
@@ -117,7 +154,10 @@ async function onPut(request) {
 		const Origin = u.protocol + '//' + u.host
 		fileBody = (
 			await fetch(url, {
-				headers: { Referer, Origin }
+				headers: {
+					Referer,
+					Origin
+				}
 			})
 		).body
 	} else {
@@ -129,14 +169,14 @@ async function onPut(request) {
 	const rootId =
 		request.searchParams.get('rootId') || self.props.default_root_id
 	return new Response(
-		JSON.stringify(await gd.uploadByPath(parent, name, fileBody, rootId)),
-		{
+		JSON.stringify(await gd.uploadByPath(parent, name, fileBody, rootId)), {
 			headers: {
 				'Content-Type': 'application/json'
 			}
 		}
 	)
 }
+
 function unauthorized() {
 	return new Response('Unauthorized', {
 		headers: {
@@ -146,6 +186,7 @@ function unauthorized() {
 		status: 401
 	})
 }
+
 function parseBasicAuth(auth) {
 	try {
 		return atob(auth.split(' ').pop()).split(':')
@@ -153,6 +194,7 @@ function parseBasicAuth(auth) {
 		return []
 	}
 }
+
 function doBasicAuth(request) {
 	const auth = request.headers.get('Authorization')
 	if (!auth || !/^Basic [A-Za-z0-9._~+/-]+=*$/i.test(auth)) {
@@ -161,6 +203,7 @@ function doBasicAuth(request) {
 	const [user, pass] = parseBasicAuth(auth)
 	return user === self.props.user && pass === self.props.pass
 }
+
 function encodePathComponent(path) {
 	return path
 		.split('/')
@@ -193,11 +236,13 @@ async function handleRequest(request) {
 		const path = request.pathname
 		let parent = encodePathComponent(
 			path
-				.split('/')
-				.slice(0, -2)
-				.join('/') + '/'
+			.split('/')
+			.slice(0, -2)
+			.join('/') + '/'
 		)
-		const { files } = await gd.listFolderByPath(
+		const {
+			files
+		} = await gd.listFolderByPath(
 			path,
 			self.props.default_root_id
 		)

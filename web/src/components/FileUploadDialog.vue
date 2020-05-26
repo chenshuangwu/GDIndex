@@ -44,7 +44,7 @@
 			<v-card-actions>
 				<div class="flex-grow-1"></div>
 				<v-btn
-					color="primary"
+					color="#34ABFF"
 					@click="upload"
 					v-text="$t('upload')"
 					text

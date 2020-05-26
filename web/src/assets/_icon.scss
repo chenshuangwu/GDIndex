@@ -1,0 +1,26 @@
+.icon {
+    display: inline-block;
+    vertical-align: middle;
+    background-size: 100% 100%;
+    width: 20px;
+    height: 22px;
+}
+
+.icon-video {
+    background-image: url(../assets/icon/video.png);
+}
+
+.icon-folder {
+    background-image: url(../assets/icon/folder.png);
+    width: 25px;
+    height: 22px;
+}
+
+.icon-pdf {
+    background-image: url(../assets/icon/pdf.png);
+}
+
+.icon-zip {
+    background-image: url(../assets/icon/zip.png);
+    width: 23px;
+}

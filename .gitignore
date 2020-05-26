@@ -83,7 +83,6 @@ typings/
 
 # gatsby files
 .cache/
-public
 
 # vuepress build output
 .vuepress/dist
@@ -102,4 +101,5 @@ public
 
 worker/script.js
 worker/wrangler.toml
+worker/self.json
 **/node_modules/

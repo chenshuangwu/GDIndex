@@ -5,6 +5,10 @@ import router from './router'
 import vuetify from './plugins/vuetify'
 import i18n from './i18n'
 import PortalVue from 'portal-vue'
+import '../src/assets/_icon.scss'
+import infiniteScroll from 'vue-infinite-scroll'
+
+Vue.use(infiniteScroll)
 
 if (window.props.defaultRootId) {
 	// backward compability

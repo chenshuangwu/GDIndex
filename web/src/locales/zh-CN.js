@@ -1,9 +1,9 @@
 import $vuetify from 'vuetify/es5/locale/zh-Hans'
 
 export default {
-	fileName: '文件名称',
+	fileName: '文件名',
 	modifiedTime: '修改时间',
-	fileSize: '文件大小',
+	fileSize: '大小',
 	mainDrive: '主硬盘',
 	search: '搜索',
 	fileUpload: '上传文件',

@@ -1,6 +1,6 @@
 # GDIndex
 
-![preview](https://i.imgur.com/ENkZwCU.png)
+![preview](https://i.imgur.com/AF89jZI.png)
 
 > GDIndex 是一个类似 [GOIndex](https://github.com/donwa/goindex) 的东西，可以在 CloudFlare Workers 上架设 Google Drive 的目录，并提供许多功能
 >
@@ -17,6 +17,18 @@
 -   不支持目录加密(.password)
 -   支持 Http Basic Auth
 -   无需修改程序，即可接入多个云端硬盘(个人、团队)
+
+## 更新日志
+
+### 2020-05-26
+在原版基础上修改：
+
+-  界面样式更新
+-  支持配置可显示的云盘数量
+-  文件列表页支持分页，可配置分页大小
+-  添加搜索功能，搜索结果分页增量展示，并支持跳转到对应路径浏览
+-  本地缓存文件列表和搜索结果，如需更新请刷新页面
+-  视频播放使用[西瓜播放器](https://github.com/bytedance/xgplayer)
 
 ## 使用教学
 

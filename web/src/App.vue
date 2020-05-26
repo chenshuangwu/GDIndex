@@ -1,51 +1,48 @@
 <template>
-	<v-app>
-		<v-app-bar app color="primary" dark>
+	<v-app id="app">
+		<v-app-bar app color="white" flat light>
 			<v-toolbar-title class="headline pointer mr-3 hidden-sm-and-down">
-				<router-link
-					:to="{ path: '/', query: { rootId: $route.query.rootId } }"
-					tag="span"
-					>{{ title }}</router-link
-				>
+				<router-link :to="{ path: '/', query: { rootId: $route.query.rootId } }" tag="span">{{ title }}</router-link>
 			</v-toolbar-title>
-			<v-toolbar-items>
-				<v-menu offset-y v-if="drives.length">
-					<template v-slot:activator="{ on }">
-						<v-btn text v-on="on" class="text-none">
-							<v-icon>mdi-cloud</v-icon>&nbsp;{{
+			<portal to="menu">
+				<div class="white pa-4 header">
+					<v-menu offset-y v-if="drives.length">
+						<template v-slot:activator="{ on }">
+							<v-btn min-width="200" text outlined v-on="on" class="text-none justify-space-between">
+								<!-- <v-icon dense>mdi-google-drive</v-icon> -->
+								&nbsp;{{
 								currentDrive.text
-							}}<v-icon>mdi-menu-down</v-icon>
-						</v-btn>
-					</template>
-					<v-list>
-						<v-list-item
-							v-for="(item, index) in drives"
-							:key="index.id"
-							@click="changeDrive(item.value)"
-						>
-							<v-list-item-title>{{
-								item.text
-							}}</v-list-item-title>
-						</v-list-item>
-					</v-list>
-				</v-menu>
-			</v-toolbar-items>
-			<portal-target name="navbar" slim />
+								}}
+								<v-icon>mdi-menu-down</v-icon>
+							</v-btn>
+						</template>
+						<v-list>
+							<v-list-item
+								v-for="(item, index) in drives"
+								:key="index.id"
+								@click="changeDrive(item.value)"
+							>
+								<v-list-item-title>{{item.text}}</v-list-item-title>
+							</v-list-item>
+						</v-list>
+					</v-menu>
+					<div class="search-box col-sm-3 col-md-3 col-lg-3 col col-xs-1 pa-0 ml-1">
+						<input class="search-input" type="text" v-model="keyword" @keyup.enter="searchFiles" placeholder="搜索文件">
+						<v-icon :focusable="false" @click="searchFiles" :ripple="false" class="icon">mdi-magnify</v-icon>
+					</div>
+					
+				</div>
+			</portal>
+			<!-- <portal-target name="navbar" slim /> -->
 			<v-spacer />
 			<v-toolbar-items>
-				<v-btn
-					text
-					class="text-none hidden-sm-and-down"
-					tag="a"
-					href="https://github.com/maple3142/GDIndex"
-					target="_blank"
-				>
-					<v-icon>mdi-github-circle</v-icon>&nbsp;GitHub</v-btn
-				>
+				<portal-target name="upload" slim />
 			</v-toolbar-items>
 		</v-app-bar>
 
-		<v-content> <router-view /> </v-content>
+		<v-content >
+			<router-view @saveCache="saveCache" :filesCache="filesCache" />
+		</v-content>
 		<LoginDialog :cond="showAuthInput" />
 	</v-app>
 </template>
@@ -61,7 +58,9 @@ export default {
 		return {
 			drives: [],
 			value: {},
-			showAuthInput: false
+			showAuthInput: false,
+			keyword: this.$route.query.keyword,
+			filesCache: {}
 		}
 	},
 	computed: {
@@ -104,8 +103,54 @@ export default {
 				return // vue-router forbid going to same location
 			}
 			this.$router.push({ path: '/', query: { rootId } })
+		},
+		searchFiles() {
+			if(this.keyword) {
+				const rootId = this.$route.query.rootId
+				this.$router.push({ path: '/', query: { rootId, keyword: this.keyword } })
+			}
+
+		},
+		saveCache(cache) {
+			this.filesCache = cache
 		}
 	},
 	components: { LoginDialog }
 }
 </script>
+
+<style lang="scss">
+#app {
+	background-color: #f6f6f6;
+}
+ul {
+	li {
+		list-style-type: none;
+	}
+}
+.header {
+	display: flex;
+	justify-content: space-between;
+}
+.search-box {
+	font-size: 14px;
+	position: relative;
+	.search-input {
+		padding: 6px 15px;
+		padding-right: 30px;
+		background-color: #F1F2F4;
+		outline: none;
+		border-radius: 16px;
+		width: 100%;
+		::placeholder {
+			color: #9A9A9A;
+		}
+
+	}
+	.icon {
+		position: absolute;
+		right: 9px;
+		top: 7px;
+	}
+}
+</style>

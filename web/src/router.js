@@ -1,9 +1,9 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import FileViewer from './components/FileViewer.vue'
-import EpubViewer from './components/EpubViewer.vue'
-import VideoViewer from './components/VideoViewer.vue'
-import PdfViewer from './components/PdfViewer.vue'
+import FileViewer from './views/FileViewer.vue'
+import EpubViewer from './views/EpubViewer.vue'
+import VideoViewer from './views/VideoViewer.vue'
+import PdfViewer from './views/PdfViewer.vue'
 
 Vue.use(VueRouter)
 const router = new VueRouter({
