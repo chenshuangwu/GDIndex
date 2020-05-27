@@ -3,15 +3,10 @@ import xf from './xfetch'
 
 /**
  * global consts
- * @type {{folder_mime_type: string, default_file_fields: string, gd_root_type: {share_drive: number, user_drive: number, sub_folder: number}}}
+ * @type {{folder_mime_type: string, default_file_fields: string}}
  */
 const CONSTS = {
 	default_file_fields: 'parents,id,name,mimeType,modifiedTime,createdTime,fileExtension,size',
-	gd_root_type: {
-	  user_drive: 0,
-	  share_drive: 1,
-	  sub_folder: 2
-	},
 	folder_mime_type : 'application/vnd.google-apps.folder',
   };
 
@@ -98,7 +93,7 @@ class GoogleDrive {
 		  .trim()
 	  }
 
-	async listFolder(id, pageToken, originKeyword) {
+	async listFolder(id, pageToken, originKeyword, rootId) {
 		await this.initializeClient()
 		let keyword = this.formatSearchKeyword(originKeyword)
 		let words = keyword.split(/\s+/);
@@ -118,8 +113,12 @@ class GoogleDrive {
 				qs.pageToken = pageToken
 			}
 			if (originKeyword) {
-				qs.corpora = 'drive';
-				qs.driveId = id;
+				if(rootId === 'root') {
+					qs.corpora = 'user'
+				} else {
+					qs.corpora = 'drive';
+					qs.driveId = rootId;
+				}
 				qs.q = `trashed = false and name !='.password' and (${nameSearchStr})`,
 				qs.pageSize = this.searchResultListPageSize
 			}
@@ -142,7 +141,7 @@ class GoogleDrive {
 	async listFolderByPath(path, rootId = 'root', pageToken = null, originKeyword = '') {
 		const id = await this.getId(path, rootId)
 		if (!id) return null
-		return this.listFolder(id, pageToken, originKeyword)
+		return this.listFolder(id, pageToken, originKeyword, rootId)
 	}
 
 

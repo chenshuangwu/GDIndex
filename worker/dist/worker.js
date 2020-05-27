@@ -260,16 +260,11 @@ self.props = {
 
   /**
    * global consts
-   * @type {{folder_mime_type: string, default_file_fields: string, gd_root_type: {share_drive: number, user_drive: number, sub_folder: number}}}
+   * @type {{folder_mime_type: string, default_file_fields: string}}
    */
 
   const CONSTS = {
     default_file_fields: 'parents,id,name,mimeType,modifiedTime,createdTime,fileExtension,size',
-    gd_root_type: {
-      user_drive: 0,
-      share_drive: 1,
-      sub_folder: 2
-    },
     folder_mime_type: 'application/vnd.google-apps.folder'
   };
 
@@ -358,7 +353,7 @@ self.props = {
       return keyword.replace(/(!=)|['"=<>/\\:]/g, nothing).replace(/[,，|(){}]/g, space).trim();
     }
 
-    async listFolder(id, pageToken, originKeyword) {
+    async listFolder(id, pageToken, originKeyword, rootId) {
       await this.initializeClient();
       let keyword = this.formatSearchKeyword(originKeyword);
       let words = keyword.split(/\s+/);
@@ -380,8 +375,13 @@ self.props = {
         }
 
         if (originKeyword) {
-          qs.corpora = 'drive';
-          qs.driveId = id;
+          if (rootId === 'root') {
+            qs.corpora = 'user';
+          } else {
+            qs.corpora = 'drive';
+            qs.driveId = rootId;
+          }
+
           qs.q = `trashed = false and name !='.password' and (${nameSearchStr})`, qs.pageSize = this.searchResultListPageSize;
         }
 
@@ -402,7 +402,7 @@ self.props = {
     async listFolderByPath(path, rootId = 'root', pageToken = null, originKeyword = '') {
       const id = await this.getId(path, rootId);
       if (!id) return null;
-      return this.listFolder(id, pageToken, originKeyword);
+      return this.listFolder(id, pageToken, originKeyword, rootId);
     }
 
     async getId(path, rootId = 'root') {
@@ -578,7 +578,7 @@ self.props = {
   }
 
   const gd = new GoogleDrive(self.props);
-  const HTML = `<!DOCTYPE html><html lang=en><head><meta charset=utf-8><meta http-equiv=X-UA-Compatible content="IE=edge"><meta name=viewport content="width=device-width,initial-scale=1"><title>${self.props.title}</title><link href="/~_~_gdindex/resources/css/app.css" rel=stylesheet></head><body><script>window.props = { title: '${self.props.title}', default_root_id: '${self.props.default_root_id}', api: location.protocol + '//' + location.host, upload: ${self.props.upload} }<\/script><div id=app></div><script src="/~_~_gdindex/resources/js/app.js"><\/script></body></html>`;
+  const HTML = `<!DOCTYPE html><html lang=en><head><meta charset=utf-8><meta http-equiv=X-UA-Compatible content="IE=edge"><meta name=viewport content="width=device-width,initial-scale=1"><title>${self.props.title}</title><link rel="icon" href="/~_~_gdindex/resources/favicon_1.ico"><link href="/~_~_gdindex/resources/css/app.css" rel=stylesheet></head><body><script>window.props = { title: '${self.props.title}', default_root_id: '${self.props.default_root_id}', api: location.protocol + '//' + location.host, upload: ${self.props.upload} }<\/script><div id=app></div><script src="/~_~_gdindex/resources/js/app.js"><\/script></body></html>`;
 
   async function onGet(request) {
     let {
@@ -660,7 +660,7 @@ self.props = {
     const rootId = request.searchParams.get('rootId') || self.props.default_root_id;
     const id = request.searchParams.get('id');
     const pageToken = request.searchParams.get('pageToken') || null;
-    let keyword = request.searchParams.get('keyword') || null;
+    const keyword = request.searchParams.get('keyword') || null;
 
     if (path === '/id2path') {
       return new Response(JSON.stringify(await gd.findPathById(id, rootId)), {

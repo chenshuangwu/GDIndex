@@ -91,9 +91,9 @@
 									<v-icon color="#00AEFF">mdi-download</v-icon>
 								</v-btn>
 							</span>-->
-							<v-col md="1" lg="1" class="text-end">{{item.fileSize}}</v-col>
+							<v-col md="2" lg="2" class="text-end">{{item.fileSize}}</v-col>
 
-							<v-col md="2" lg="3" class="modifyed-time text-end">{{item.modifiedTime}}</v-col>
+							<v-col md="3" lg="3" class="modifyed-time text-end">{{item.modifiedTime}}</v-col>
 						</v-row>
 					</v-list-item>
 
@@ -182,7 +182,7 @@ const ICON_NAME = {
 	'application/octet-stream': 'icon-octet-stream',
 	'application/x-font-ttf': 'icon-ttf',
 	'audio/x-flac': 'icon-music',
-	'audio/mpeg': 'icon-music',
+	'audio/mpeg': 'icon-mp3',
 	'audio/flac': 'icon-music',
 	'audio/x-wav': 'icon-music',
 	'audio/x-hx-aac-adts': 'icon-music'
