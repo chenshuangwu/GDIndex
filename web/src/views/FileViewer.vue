@@ -148,6 +148,7 @@ const SUPPORTED_TYPES = {
 	'application/pdf': 'pdf'
 }
 const ICON_NAME = {
+	'application/rar': 'icon-zip',
 	'application/x-rar': 'icon-zip',
 	'application/x-zip-compressed': 'icon-zip',
 	'application/vnd.google-apps.folder': 'icon-folder',
@@ -293,7 +294,7 @@ export default {
 	},
 	methods: {
 		async goPath(path, opener, id, item) {
-			if (this.loading) return
+			// if (this.loading) return
 			const query = {
 				rootId: this.$route.query.rootId
 			}
@@ -566,16 +567,16 @@ export default {
 	created() {
 		this.handlePath(this.path, this.$route.query)
 	},
-	beforeRouteUpdate(to, from, next) {
-		const fullyEncoded = to.params.path
-			.split('/')
-			.map(decodeURIComponent)
-			.map(encodeURIComponent)
-			.join('/') // because vue-router's encoding is a little bit weird...
-		if (this.handlePath('/' + fullyEncoded, to.query)) {
-			next()
-		}
-	},
+	// beforeRouteUpdate(to, from, next) {
+	// 	const fullyEncoded = to.params.path
+	// 		.split('/')
+	// 		.map(decodeURIComponent)
+	// 		.map(encodeURIComponent)
+	// 		.join('/') // because vue-router's encoding is a little bit weird...
+	// 	if (this.handlePath('/' + fullyEncoded, to.query)) {
+	// 		next()
+	// 	}
+	// },
 	components: {
 		FileUploadDialog
 	}
