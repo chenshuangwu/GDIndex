@@ -58,7 +58,6 @@
 
 		<v-content>
 			<router-view
-				:key="$route.fullPath"
 				@saveCache="saveCache"
 				:filesCache="filesCache"
 				:searchKey="keyword"
