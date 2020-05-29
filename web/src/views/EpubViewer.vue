@@ -12,7 +12,7 @@ import html from 'raw-loader!../assets/epub-reader.html'
 
 export default {
 	async mounted() {
-		const url = atob(this.$route.query.urlBase64)
+		const url = decodeURIComponent(this.$route.query.url)
 		const iframe = this.$refs.container
 		iframe.srcdoc = html
 		iframe.onload = () => {

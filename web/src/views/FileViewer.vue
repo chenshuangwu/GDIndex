@@ -23,7 +23,7 @@
 		</v-row>-->
 		<v-row justify="center">
 			<v-col md="10" lg="8">
-				<portal-target name="menu" slim />
+				<portal-target name="menu" />
 				<v-card
 					id="images"
 					class="mx-auto"
@@ -191,6 +191,9 @@ const ICON_COLOR = {
 	'application/vnd.google-apps.folder': '#FED032'
 }
 export default {
+	components: {
+		FileUploadDialog
+	},
 	props: {
 		filesCache: Object,
 		searchKey: String,
@@ -226,7 +229,7 @@ export default {
 			pageToken: '',
 			busy: true,
 			loadEnd: false,
-			apiPath: this.path,
+			path: '/' + this.$route.params.path,
 			keyword: this.$route.query.keyword,
 			rootId: this.$route.query.rootId || window.props.default_root_id,
 			pathDialog: false,
@@ -236,9 +239,9 @@ export default {
 		}
 	},
 	computed: {
-		path() {
-			return '/' + this.$route.params.path
-		},
+		// path() {
+		// 	return '/' + this.$route.params.path
+		// },
 		pathSegments() {
 			const list = this.path
 				.split('/')
@@ -293,7 +296,7 @@ export default {
 	},
 	methods: {
 		async goPath(path, opener, id, item) {
-			if (this.loading) return
+			// if (this.loading) return
 			const query = {
 				rootId: this.$route.query.rootId
 			}
@@ -309,37 +312,74 @@ export default {
 				this.pathDialog = true
 				return
 			}
-			this.$router.push({
-				path: path
-					.split('/')
-					.map(decodeURIComponent)
-					.map(encodeURIComponent)
-					.join('/'),
-				query
-			})
-		},
-		goPathBySearch() {
-			this.pathDialog = false
-			let query = {
-				rootId: this.rootId,
-				opener: this.searchItemSelected.opener
-			}
-			this.goPath(this.searchItemSelected.path, this.searchItemSelected.opener)
-			// this.handlePath(this.searchItemSelected.path, query)
-		},
-		async getPathById(id, rootId) {
-			let params = {
-				id,
-				rootId
-			}
-			const data = await api
-				.post('/id2path', {
-					method: 'POST',
-					qs: params
+
+			if (path.substr(-1) === '/') {
+				this.$router.push({
+					path: path
+						.split('/')
+						.map(decodeURIComponent)
+						.map(encodeURIComponent)
+						.join('/'),
+					query
 				})
-				.json()
-			return data.path
+			} else {
+				let u = nodeUrl.resolve(window.props.api, path)
+				//if (Math.random() < 10) return
+				if (
+					query.rootId &&
+					query.rootId !== window.props.default_root_id
+				) {
+					u += '?rootId=' + query.rootId
+				}
+				if (query.opener) {
+					if (query.opener === 'image') {
+						const img = new Image()
+						img.src = u
+						img.style.display = 'none'
+						document.body.appendChild(img)
+						const viewer = new ImageViewer(img)
+						viewer.show()
+						img.onload = () => {
+							img.addEventListener('hide', () => {
+								viewer.destroy()
+								img.remove()
+							})
+						}
+						return
+					}
+					this.$router.push({
+						path: '/~viewer/' + query.opener,
+						query: { urlBase64: encodeURIComponent(u) }
+					})
+				} else {
+					location.href = u
+				}
+			}
+
+
 		},
+		// goPathBySearch() {
+		// 	this.pathDialog = false
+		// 	let query = {
+		// 		rootId: this.rootId,
+		// 		opener: this.searchItemSelected.opener
+		// 	}
+		// 	this.goPath(this.searchItemSelected.path, this.searchItemSelected.opener)
+		// 	// this.handlePath(this.searchItemSelected.path, query)
+		// },
+		// async getPathById(id, rootId) {
+		// 	let params = {
+		// 		id,
+		// 		rootId
+		// 	}
+		// 	const data = await api
+		// 		.post('/id2path', {
+		// 			method: 'POST',
+		// 			qs: params
+		// 		})
+		// 		.json()
+		// 	return data.path
+		// },
 		getFileUrl(path) {
 			const { rootId } = this.$route.query
 			let u = nodeUrl.resolve(
@@ -354,53 +394,52 @@ export default {
 			}
 			return u
 		},
-		renderPath(path, rootId, keyword) {
-			this.apiPath = path
-			this.pageToken = null
-			this.loadEnd = false
-			this.$route.query.rootId = rootId
-			this.keyword = keyword
-			let renderStart = (this.renderStart = Date.now()) // Withous this, when user regret navigating a big folder, it will have some conflict.
-			// this.loading = true
-			if (!rootId) {
-				rootId = window.props.default_root_id
-			}
-			this.list = []
+		// renderPath(path, rootId, keyword) {
+		// 	this.path = path
+		// 	this.pageToken = null
+		// 	this.loadEnd = false
+		// 	this.$route.query.rootId = rootId
+		// 	this.keyword = keyword
+		// 	let renderStart = (this.renderStart = Date.now()) // Withous this, when user regret navigating a big folder, it will have some conflict.
+		// 	// this.loading = true
+		// 	if (!rootId) {
+		// 		rootId = window.props.default_root_id
+		// 	}
+		// 	this.list = []
 
-			if (
-				this.keyword &&
-				this.filesCache[rootId] && this.filesCache[rootId].keyword &&
-				this.filesCache[rootId].keyword[this.keyword]
-			) {
-				let cacheData = this.filesCache[rootId].keyword[this.keyword]
-				this.list = cacheData.list
-				this.pageToken = cacheData.pageToken
-				this.loadEnd = cacheData.loadEnd
-				this.busy = cacheData.busy
-			} else if (
-				!this.keyword &&
-				this.filesCache[rootId] &&
-				this.filesCache[rootId][this.apiPath]
-			) {
-				let cacheData = this.filesCache[rootId][this.apiPath]
-				this.list = cacheData.list
-				this.pageToken = cacheData.pageToken
-				this.loadEnd = cacheData.loadEnd
-				this.busy = cacheData.busy				
-			} else {
-				this.getFilesList()
-			}
+		// 	if (
+		// 		this.keyword &&
+		// 		this.filesCache[rootId] && this.filesCache[rootId].keyword &&
+		// 		this.filesCache[rootId].keyword[this.keyword]
+		// 	) {
+		// 		let cacheData = this.filesCache[rootId].keyword[this.keyword]
+		// 		this.list = cacheData.list
+		// 		this.pageToken = cacheData.pageToken
+		// 		this.loadEnd = cacheData.loadEnd
+		// 		this.busy = cacheData.busy
+		// 	} else if (
+		// 		!this.keyword &&
+		// 		this.filesCache[rootId] &&
+		// 		this.filesCache[rootId][this.path]
+		// 	) {
+		// 		let cacheData = this.filesCache[rootId][this.path]
+		// 		this.list = cacheData.list
+		// 		this.pageToken = cacheData.pageToken
+		// 		this.loadEnd = cacheData.loadEnd
+		// 		this.busy = cacheData.busy				
+		// 	} else {
+		// 		this.getFilesList()
+		// 	}
 			
 
-			if (renderStart !== this.renderStart) {
-				// User had initiated other folder navigation request
-				return
-			}
-		},
+		// 	if (renderStart !== this.renderStart) {
+		// 		// User had initiated other folder navigation request
+		// 		return
+		// 	}
+		// },
 
 		loadMore() {
 			if (this.busy) return
-
 			this.getFilesList()
 		},
 
@@ -408,60 +447,57 @@ export default {
 		async getFilesList() {
 			if (this.loading) return
 
+			this.list = []
+			const rootId = this.rootId
+			const path = this.path
+			const keyword = this.keyword
+			let cacheData = this.getCacheData(rootId, path, keyword)
+			if(cacheData) {
+				this.list = cacheData.list
+				this.pageToken = cacheData.pageToken
+				this.loadEnd = cacheData.loadEnd
+				this.busy = cacheData.busy
+			}
+			if(cacheData && !this.pageToken) return
+
 			this.loading = true
-			let rootId =
-				this.$route.query.rootId || window.props.default_root_id
+
 			let params = {
 				rootId
 			}
 			if (this.pageToken) {
 				params.pageToken = this.pageToken
 			}
-			if (this.keyword) {
-				params.keyword = this.keyword
+			if (keyword) {
+				params.keyword = keyword
 			}
+
 			const data = await api
-				.post(this.apiPath, {
+				.post(this.path, {
 					method: 'POST',
 					qs: params
 				})
 				.json()
+
+			this.loading = false
+			if(!data) return
 
 			let listTemp = this.formatList(data)
 			this.list = this.list.concat(listTemp)
 			this.pageToken = data.nextPageToken || ''
 			this.busy = data.nextPageToken ? false : true
 			this.loadEnd = data.nextPageToken ? false : true
-			this.loading = false
 
-			let cacheData = {
+			cacheData = {
 				list: this.list,
 				pageToken: this.pageToken,
 				busy: this.busy,
 				loadEnd: this.loadEnd
 			}
 
-			// todo： 优化缓存代码
-			if (this.filesCache[rootId]) {
-				if(this.keyword && this.filesCache[rootId].keyword) {
-					this.filesCache[rootId].keyword[this.keyword] = cacheData
-				} else if(this.keyword) {
-					this.filesCache[rootId].keyword = {}
-					this.filesCache[rootId].keyword[this.keyword] = cacheData
-				} else {
-					this.filesCache[rootId][this.apiPath] = cacheData
-				}				
-			} else {
-				this.filesCache[rootId] = {}
-				if(this.keyword) {
-					this.filesCache[rootId].keyword = {}
-					this.filesCache[rootId].keyword[this.keyword] = cacheData
-				} else {
-					this.filesCache[rootId][this.apiPath] = cacheData
-				}
-				
-			}
-			this.$emit('saveCache', this.filesCache)
+			this.saveCache(cacheData, rootId, path, keyword)
+
+
 		},
 
 		formatList(data) {
@@ -520,65 +556,109 @@ export default {
 			return listT
 		},
 
-		handlePath(path, query) {
-			if (path.substr(-1) === '/') {
-				this.renderPath(path, query.rootId, query.keyword)
-				return true
-			} else {
-				let u = nodeUrl.resolve(window.props.api, path)
-				//if (Math.random() < 10) return
-				if (
-					query.rootId &&
-					query.rootId !== window.props.default_root_id
-				) {
-					u += '?rootId=' + query.rootId
-				}
-				if (query.opener) {
-					if (query.opener === 'image') {
-						const img = new Image()
-						img.src = u
-						img.style.display = 'none'
-						document.body.appendChild(img)
-						const viewer = new ImageViewer(img)
-						viewer.show()
-						img.onload = () => {
-							img.addEventListener('hide', () => {
-								viewer.destroy()
-								img.remove()
-							})
-						}
-						return
-					}
-					this.$router.push({
-						path: '/~viewer/' + query.opener,
-						query: { urlBase64: u }
-					})
+		saveCache(cacheData, rootId, path, keyword) {
+			// todo： 优化缓存代码
+			if (this.filesCache[rootId]) {
+				if(keyword && this.filesCache[rootId].keyword) {
+					this.filesCache[rootId].keyword[keyword] = cacheData
+				} else if(keyword) {
+					this.filesCache[rootId].keyword = {}
+					this.filesCache[rootId].keyword[keyword] = cacheData
 				} else {
-					location.href = u
+					this.filesCache[rootId][path] = cacheData
+				}				
+			} else {
+				this.filesCache[rootId] = {}
+				if(keyword) {
+					this.filesCache[rootId].keyword = {}
+					this.filesCache[rootId].keyword[keyword] = cacheData
+				} else {
+					this.filesCache[rootId][path] = cacheData
 				}
+				
 			}
+			this.$emit('saveCache', this.filesCache)
 		},
+		
+		getCacheData(rootId, path, keyword = null) {
+			let cacheData = null
+			if (
+				keyword &&
+				this.filesCache[rootId] && this.filesCache[rootId].keyword &&
+				this.filesCache[rootId].keyword[keyword]
+			) {
+				cacheData = this.filesCache[rootId].keyword[keyword]
+
+			} else if (
+				!keyword &&
+				this.filesCache[rootId] &&
+				this.filesCache[rootId][path]
+			) {
+				cacheData = this.filesCache[rootId][path]			
+			}
+			return cacheData
+		},
+
+		// handlePath(path, query) {
+		// 	if (path.substr(-1) === '/') {
+		// 		this.renderPath(path, query.rootId, query.keyword)
+		// 		return true
+		// 	} else {
+		// 		let u = nodeUrl.resolve(window.props.api, path)
+		// 		//if (Math.random() < 10) return
+		// 		if (
+		// 			query.rootId &&
+		// 			query.rootId !== window.props.default_root_id
+		// 		) {
+		// 			u += '?rootId=' + query.rootId
+		// 		}
+		// 		if (query.opener) {
+		// 			if (query.opener === 'image') {
+		// 				const img = new Image()
+		// 				img.src = u
+		// 				img.style.display = 'none'
+		// 				document.body.appendChild(img)
+		// 				const viewer = new ImageViewer(img)
+		// 				viewer.show()
+		// 				img.onload = () => {
+		// 					img.addEventListener('hide', () => {
+		// 						viewer.destroy()
+		// 						img.remove()
+		// 					})
+		// 				}
+		// 				return
+		// 			}
+		// 			this.$router.push({
+		// 				path: '/~viewer/' + query.opener,
+		// 				query: { urlBase64: u }
+		// 			})
+		// 		} else {
+		// 			location.href = u
+		// 		}
+		// 	}
+		// },
 		uploadComplete() {
 			this.showUploadDialog = false
-			this.renderPath(this.path, this.$route.query.rootId)
+			// this.renderPath(this.path, this.$route.query.rootId)
 		}
 	},
 	created() {
-		this.handlePath(this.path, this.$route.query)
+		console.log('created')
+		console.log(this.$route)
+		this.getFilesList()
+		// this.handlePath(this.path, this.$route.query)
 	},
-	beforeRouteUpdate(to, from, next) {
-		const fullyEncoded = to.params.path
-			.split('/')
-			.map(decodeURIComponent)
-			.map(encodeURIComponent)
-			.join('/') // because vue-router's encoding is a little bit weird...
-		if (this.handlePath('/' + fullyEncoded, to.query)) {
-			next()
-		}
-	},
-	components: {
-		FileUploadDialog
-	}
+	// beforeRouteUpdate(to, from, next) {
+	// 	const fullyEncoded = to.params.path
+	// 		.split('/')
+	// 		.map(decodeURIComponent)
+	// 		.map(encodeURIComponent)
+	// 		.join('/') // because vue-router's encoding is a little bit weird...
+	// 	if (this.handlePath('/' + fullyEncoded, to.query)) {
+	// 		next()
+	// 	}
+	// },
+
 }
 </script>
 <style lang="scss" scoped>

@@ -73,7 +73,7 @@ export default {
 
 		// video.play()
 		// const url = new URL(atob(this.$route.query.urlBase64))
-		const url = this.$route.query.urlBase64
+		const url = decodeURIComponent(this.$route.query.urlBase64)
 		
 		  this.player = new Player({
 			id: 'video',
