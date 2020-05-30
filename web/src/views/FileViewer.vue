@@ -106,12 +106,7 @@
 				</v-card>
 			</v-col>
 		</v-row>
-		<!-- <v-dialog v-model="pathDialog" hide-overlay class="text-center">
-			<v-card max-width="400">
-				<a @click.stop="goPathBySearch"  :href="searchResultPath + '?rootId=' + this.rootId" target="_blank">{{searchResultPath}}</a>
-			</v-card>
-			
-		</v-dialog>-->
+
 		<div class="text-center">
 			<v-dialog v-model="pathDialog" width="500">
 				<v-card>
@@ -358,28 +353,28 @@ export default {
 
 
 		},
-		// goPathBySearch() {
-		// 	this.pathDialog = false
-		// 	let query = {
-		// 		rootId: this.rootId,
-		// 		opener: this.searchItemSelected.opener
-		// 	}
-		// 	this.goPath(this.searchItemSelected.path, this.searchItemSelected.opener)
-		// 	// this.handlePath(this.searchItemSelected.path, query)
-		// },
-		// async getPathById(id, rootId) {
-		// 	let params = {
-		// 		id,
-		// 		rootId
-		// 	}
-		// 	const data = await api
-		// 		.post('/id2path', {
-		// 			method: 'POST',
-		// 			qs: params
-		// 		})
-		// 		.json()
-		// 	return data.path
-		// },
+		goPathBySearch() {
+			this.pathDialog = false
+			let query = {
+				rootId: this.rootId,
+				opener: this.searchItemSelected.opener
+			}
+			this.goPath(this.searchItemSelected.path, this.searchItemSelected.opener)
+			// this.handlePath(this.searchItemSelected.path, query)
+		},
+		async getPathById(id, rootId) {
+			let params = {
+				id,
+				rootId
+			}
+			const data = await api
+				.post('/id2path', {
+					method: 'POST',
+					qs: params
+				})
+				.json()
+			return data.path
+		},
 		getFileUrl(path) {
 			const { rootId } = this.$route.query
 			let u = nodeUrl.resolve(
@@ -444,7 +439,7 @@ export default {
 		},
 
 		// get files list
-		async getFilesList() {
+		async getFilesList(refresh = false) {
 			if (this.loading) return
 
 			this.list = []
@@ -452,13 +447,17 @@ export default {
 			const path = this.path
 			const keyword = this.keyword
 			let cacheData = this.getCacheData(rootId, path, keyword)
-			if(cacheData) {
-				this.list = cacheData.list
-				this.pageToken = cacheData.pageToken
-				this.loadEnd = cacheData.loadEnd
-				this.busy = cacheData.busy
+
+			if(!refresh) {
+				if(cacheData) {
+					this.list = cacheData.list
+					this.pageToken = cacheData.pageToken
+					this.loadEnd = cacheData.loadEnd
+					this.busy = cacheData.busy
+				}
+				if(cacheData && !this.pageToken) return
 			}
-			if(cacheData && !this.pageToken) return
+
 
 			this.loading = true
 
@@ -471,6 +470,12 @@ export default {
 			if (keyword) {
 				params.keyword = keyword
 			}
+
+			if(refresh) {
+				params.pageToken = ''
+				params.keyword = ''
+			}
+			
 
 			const data = await api
 				.post(this.path, {
@@ -639,12 +644,10 @@ export default {
 		// },
 		uploadComplete() {
 			this.showUploadDialog = false
-			// this.renderPath(this.path, this.$route.query.rootId)
+			this.getFilesList(true)
 		}
 	},
 	created() {
-		console.log('created')
-		console.log(this.$route)
 		this.getFilesList()
 		// this.handlePath(this.path, this.$route.query)
 	},

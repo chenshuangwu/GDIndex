@@ -46,7 +46,7 @@
 							<v-icon :focusable="false" @click="searchFiles" :ripple="false" class="icon">mdi-magnify</v-icon>
 						</div>
 					</div>
-					<v-switch v-model="current" dense  color="#00AEFF" class="ma-0 mr-2 align-self-end" label="当前页搜索"></v-switch>
+					<v-switch v-model="current" dense  color="#00AEFF" class="ma-0 mr-2 align-self-end" label="当前结果筛选"></v-switch>
 				</div>
 			</portal>
 			<!-- <portal-target name="navbar" slim /> -->
