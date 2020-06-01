@@ -30,6 +30,9 @@
 -  本地缓存文件列表和搜索结果，如需更新请刷新页面
 -  视频播放使用[西瓜播放器](https://github.com/bytedance/xgplayer)
 
+## 开发
+前端vue本地开发调试，需要修改/web/public/index.html文件中的props，修改为自己线上部署的workers。
+
 ## 使用教学
 
 ### 简单、自动的方法

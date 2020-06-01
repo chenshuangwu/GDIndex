@@ -79,7 +79,7 @@
 								<i :class="['icon ', item.icon]"></i>
 							</v-list-item-avatar>
 							<span class="v-list-item__title file-name">{{item.fileName}}</span>
-							<!-- <span v-if="!item.isFolder">
+							<span v-if="!item.isFolder" class="download">
 								<v-btn
 									icon
 									v-if="!item.isFolder && !item.isGoogleFile"
@@ -90,10 +90,10 @@
 								>
 									<v-icon color="#00AEFF">mdi-download</v-icon>
 								</v-btn>
-							</span>-->
-							<v-col md="2" lg="2" class="text-end">{{item.fileSize}}</v-col>
+							</span>
+							<span class="text-end d-flex justify-end file-size">{{item.fileSize}}</span>
 
-							<v-col md="3" lg="3" class="modifyed-time text-end">{{item.modifiedTime}}</v-col>
+							<span class="text-end d-flex justify-end modifyed-time">{{item.modifiedTime}}</span>
 						</v-row>
 					</v-list-item>
 
@@ -207,14 +207,14 @@ export default {
 				{
 					text: this.$t('fileSize'),
 					value: 'fileSize',
-					class: 'text-end col-md-2 col-lg-2 col',
+					class: 'text-end file-size',
 					filterable: false
 				},
 				{
 					text: this.$t('modifiedTime'),
 					value: 'modifiedTime',
 					filterable: false,
-					class: 'modifyed-time text-end col-md-2 col-lg-3 col'
+					class: 'modifyed-time text-end '
 				}
 			],
 			renderStart: null,
@@ -709,6 +709,27 @@ export default {
 	.file-name {
 		flex: 1;
 		width: 0;
+	}
+	.file-size {
+		flex-grow: 0;
+		width: 5rem;
+		align-items: center;
+	}
+	.modifyed-time {
+		flex-grow: 0;
+		width: 11rem;
+		align-items: center;
+
+	}
+	.download {
+		display: none;
+	}
+
+	:hover {
+		.download {
+			display: flex;
+			align-items: center;
+		}
 	}
 }
 .list-item-end {
