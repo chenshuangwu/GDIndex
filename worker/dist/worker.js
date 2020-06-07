@@ -625,6 +625,32 @@ self.props = {
           'Content-Type': 'text/html; charset=utf-8'
         }
       });
+    } else if (path.startsWith('/filesId/')) {
+      const filesId = path.replace('/filesId/', '');
+      const result = await gd.getMeta(filesId);
+
+      if (!result) {
+        return new Response('null', {
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          status: 404
+        });
+      }
+
+      const isGoogleApps = result.mimeType.includes('vnd.google-apps');
+
+      if (!isGoogleApps) {
+        const r = await gd.download(filesId, request.headers.get('Range'));
+        const h = new Headers(r.headers);
+        h.set('Content-Disposition', `inline; filename*=UTF-8''${encodeURIComponent(result.name)}`);
+        return new Response(r.body, {
+          status: r.status,
+          headers: h
+        });
+      } else {
+        return Response.redirect(result.webViewLink, 302);
+      }
     } else {
       const result = await gd.getMetaByPath(path, rootId);
 

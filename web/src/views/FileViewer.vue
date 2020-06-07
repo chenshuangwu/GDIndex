@@ -84,7 +84,8 @@
 									icon
 									v-if="!item.isFolder && !item.isGoogleFile"
 									tag="a"
-									:href="getFileUrl(item.resourcePath)"
+									:href="getFileUrl(item.downloadUrl)"
+									target="_blank"
 									download
 									@click.stop
 								>
@@ -514,7 +515,7 @@ export default {
 				const resourcePath =
 					nodeUrl.resolve(this.path, f.name) + (isFolder ? '/' : '')
 				let fullPath = nodeUrl.resolve(window.props.api, resourcePath)
-
+				const downloadUrl = nodeUrl.resolve('/filesId/', f.id)
 				const o = {
 					id: f.id,
 					fileName: f.name,
@@ -527,6 +528,7 @@ export default {
 					mimeType: f.mimeType,
 					fileSize: f.size ? prettyBytes(parseInt(f.size)) : '',
 					resourcePath,
+					downloadUrl,
 					icon: ICON_NAME[f.mimeType] || 'icon-unknown',
 					color: ICON_COLOR[f.mimeType],
 					thumbnailLink: f.thumbnailLink
@@ -735,6 +737,12 @@ export default {
 .list-item-end {
 	text-align: center;
 	padding: 20px;
+}
+@media screen and (max-width: 500px) {
+	.file-size, .list-item .modifyed-time {
+		display: none !important;
+	}
+	 
 }
 </style>
 
